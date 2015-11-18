@@ -32,7 +32,7 @@ int sendMessage(int fd, char* buf, int expLen)
 {
 	int len = write(fd, buf, strlen(buf));
 	if(len < MIN_LENGTH)
-		errorCloseSock("send error", fd);
+		errorCloseSock("Send message error.", fd);
 	memset(buf, 0, strlen(buf));
 	return len;
 }
@@ -49,7 +49,7 @@ int createSocket(int l, SAin* adrs)
 {
 	l = socket(AF_INET, SOCK_STREAM, 0);
 	if(l < MIN_LENGTH)
-		error("socket error");
+		error("Socket create error.");
 	setupSocket(adrs);	// init socket addr
 	return l;
 }
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 	// connect to server
 	rcv = connect(sockfd, (struct sockaddr*) &addr, sizeof(SAin));
 	if(rcv < 0)
-		errorCloseSock("connect error", sockfd);
+		errorCloseSock("Connection error. Is the server running?", sockfd);
 	
 	// start main loop
 	clientLoop(sockfd);
