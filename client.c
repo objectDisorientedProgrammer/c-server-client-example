@@ -1,23 +1,16 @@
 /*
 	client.c
 	Author: Douglas Chidester
+	
+	Version: Linux
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <string.h>
-
-#define PORT 71153
-#define SIZE 32768
+#include "client.h"
 
 void error(char* msg)
 {
 	perror(msg);
-	exit(-1);
+	exit(ERROR_VAL);
 }
 
 void errorCloseSock(char* msg, int sock)
@@ -38,7 +31,7 @@ void printHelp()
 int sendMessage(int fd, char* buf, int expLen)
 {
 	int len = write(fd, buf, strlen(buf));
-	if(len < 0)
+	if(len < MIN_LENGTH)
 		errorCloseSock("send error", fd);
 	memset(buf, 0, strlen(buf));
 	return len;
@@ -49,13 +42,13 @@ void setupSocket(SAin* addr)
 	memset(addr, 0, sizeof(addr));
 	addr->sin_family = AF_INET;
 	addr->sin_addr.s_addr = htonl(INADDR_ANY);
-	addr->sin_port = htons(PORT);
+	addr->sin_port = htons(PORT_NUM);
 }
 
 int createSocket(int l, SAin* adrs)
 {
 	l = socket(AF_INET, SOCK_STREAM, 0);
-	if(l < 0)
+	if(l < MIN_LENGTH)
 		error("socket error");
 	setupSocket(adrs);	// init socket addr
 	return l;
@@ -64,23 +57,23 @@ int createSocket(int l, SAin* adrs)
 void getUserInput(char* buf)
 {
 	printf("$ ");
-	fgets(buf, SIZE, stdin);
-	buf[strlen(buf)-1] = '\0';
+	fgets(buf, BUFFER_SIZE, stdin);
+	buf[strlen(buf)-1] = '\0'; // add null terminator
 }
 
 void getResponse(char* sendBuf, char* buf, int sockfd)
 {
-	int len = read(sockfd, sendBuf, SIZE);
+	int len = read(sockfd, sendBuf, BUFFER_SIZE);
 	puts(sendBuf);
-	memset(sendBuf, 0, SIZE);
-	memset(buf, 0, SIZE);
+	memset(sendBuf, 0, BUFFER_SIZE);
+	memset(buf, 0, BUFFER_SIZE);
 }
 
 // EXCEEDS 5 LINES
 void clientLoop(int sockfd)
 {
-	int done = 0;
-	char buf[SIZE], sendBuf[SIZE];
+	char done = 0;
+	char buf[BUFFER_SIZE], sendBuf[BUFFER_SIZE];
 	puts("\nEnter a command ('help' for options):");
 	do
 	{
@@ -106,12 +99,14 @@ void clientLoop(int sockfd)
 int main(int argc, char* argv[])
 {
 	int rcv, sockfd;
-	sockaddr_in addr;
+	SAin addr;
+	
+	// TODO check cmd line arguments
 	
 	// create socket
 	sockfd = createSocket(sockfd, &addr);
 	// connect to server
-	rcv = connect(sockfd, (struct sockaddr*) &addr, sizeof(sockaddr_in));
+	rcv = connect(sockfd, (struct sockaddr*) &addr, sizeof(SAin));
 	if(rcv < 0)
 		errorCloseSock("connect error", sockfd);
 	
