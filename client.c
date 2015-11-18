@@ -81,7 +81,7 @@ void clientLoop(int sockfd)
 		if(strcmp(buf, "help") == 0)	// check for 'help' command
 		{
 			printHelp();
-			continue;
+			continue; // TODO remove this and change to if/else
 		}
 		// check for quit command
 		if(strcmp(buf, "done") == 0 || strcmp(buf, "kill") == 0)
