@@ -15,10 +15,10 @@
 #include <netdb.h>
 #include <string.h>
 
-#define PORT_NUM	71153
-#define BUFFER_SIZE 32768
-#define ERROR_VAL	-1
-#define MIN_LENGTH	0
+#define PORT_NUM      71153
+#define BUFFER_SIZE   32768
+#define ERROR_VAL        -1
+#define MIN_LENGTH        0
 
 typedef struct sockaddr_in SAin;
 
