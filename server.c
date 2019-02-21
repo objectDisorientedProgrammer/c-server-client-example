@@ -14,7 +14,7 @@
 #include <string.h>
 #include <sys/wait.h>
 
-#define PORT 74540
+#define PORT 71153
 #define SIZE 32768
 #define MAX_CONNECTIONS 5
 
