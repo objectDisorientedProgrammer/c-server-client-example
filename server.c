@@ -96,7 +96,7 @@ void setupArg(char** arg, char* file)
 {
     arg[0] = "/bin/ls";
     arg[1] = "-l";
-    arg[2] = file == NULL? NULL : file;
+    arg[2] = file == NULL? NULL : file; // TODO does this work?
     arg[3] = NULL;
 }
 

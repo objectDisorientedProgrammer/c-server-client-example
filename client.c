@@ -7,6 +7,9 @@
 
 #include "client.h"
 
+#define ERROR_VAL  -1
+#define MIN_LENGTH 0
+
 void error(char* msg)
 {
     perror(msg);
@@ -81,7 +84,6 @@ void clientLoop(int sockfd)
         if(strcmp(buf, "help") == 0)    // check for 'help' command
         {
             printHelp();
-            //continue; // TODO remove this and change to if/else
         }
         // check for quit command
         else if(strcmp(buf, "done") == 0 || strcmp(buf, "kill") == 0)
