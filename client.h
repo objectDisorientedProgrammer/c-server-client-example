@@ -9,11 +9,5 @@
 
 #include "common.h"
 
-
-#define ERROR_VAL        -1
-#define MIN_LENGTH        0
-
-
-
 #endif // CLIENT_H
 
