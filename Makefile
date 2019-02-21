@@ -14,3 +14,6 @@ client: ${SRCCLT}
 
 clean: 
 	rm ${PROGS}
+
+.PHONY: clean
+.PHONY: all
