@@ -5,20 +5,10 @@
     Version: Linux
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <string.h>
+#include "server.h"
 #include <sys/wait.h>
 
-#define PORT 71153
-#define SIZE 32768
 #define MAX_CONNECTIONS 5
-
-typedef struct sockaddr_in SAin;
 
 void error(char* msg)
 {
@@ -52,7 +42,7 @@ void setSockIn(SAin* addr)
     memset(addr, 0, sizeof(addr));
     addr->sin_family = AF_INET;
     addr->sin_addr.s_addr = htonl(INADDR_ANY);
-    addr->sin_port = htons(PORT);
+    addr->sin_port = htons(DEFAULT_PORT_NUM);
 }
 
 int bindSocket(SAin addr, int sockfd)
@@ -83,13 +73,13 @@ int acceptConnection(int socket)
 
 int getMessage(int aSock, int lSock, char* msg)
 {
-    char buffer[SIZE];
-    int bits = read(aSock, buffer, SIZE);
+    char buffer[BUFFER_SIZE];
+    int bits = read(aSock, buffer, BUFFER_SIZE);
     printf("got: '%s'\n", buffer);
     if(bits < 0)
         errorClose2Sock("recv error", aSock, lSock);
     strcpy(msg, buffer);
-    memset(buffer, 0, SIZE);
+    memset(buffer, 0, BUFFER_SIZE);
     return bits;
 }
 
@@ -106,7 +96,7 @@ void setupArg(char** arg, char* file)
 {
     arg[0] = "/bin/ls";
     arg[1] = "-l";
-    arg[2] = file;
+    arg[2] = file == NULL? NULL : file; // TODO does this work?
     arg[3] = NULL;
 }
 
@@ -143,7 +133,7 @@ void doLsl(char* file, int s1, int s2)
 void listContents(char* buf, int acpt, int lis)
 {
     char* pch = strtok(buf, " ");
-    char temp[SIZE];
+    char temp[BUFFER_SIZE];
     
     pch = strtok(NULL, " ");
     while(pch != NULL)
@@ -169,14 +159,12 @@ int handleConnection(char* buf, int acpt, int lis, int rcv)
     
         if(strcmp(buf, "kill") == 0)    // exit
         {
-            char gb[9];
-            
-            //sendMessage(acpt, lis, "Goodbye!");
-            //puts("client disconnected");
             return 1;
         }
         else if(strstr(buf, "list") != NULL) // list dir contents
             listContents(buf, acpt, lis);
+        else if(strstr(buf, "done") != NULL) // client exit
+            puts("client disconnected");
         else
             sendMessage(acpt, lis, buf);    // echo message back
         memset(buf, 0, strlen(buf));
@@ -187,7 +175,7 @@ void loopOverClients(int lis, int rcv)
 {
     int done = 0;
     int acpt;
-    char buf[SIZE];
+    char buf[BUFFER_SIZE];
     
     while(!done)
     {    
@@ -196,7 +184,7 @@ void loopOverClients(int lis, int rcv)
         // loop once per connection
         done = handleConnection(buf, acpt, lis, rcv);
         //close(acpt);
-        memset(buf, 0, SIZE);
+        memset(buf, 0, BUFFER_SIZE);
     }
     close(acpt);
 }

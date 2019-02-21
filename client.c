@@ -7,6 +7,9 @@
 
 #include "client.h"
 
+#define ERROR_VAL  -1
+#define MIN_LENGTH 0
+
 void error(char* msg)
 {
     perror(msg);
@@ -42,7 +45,7 @@ void setupSocket(SAin* addr)
     memset(addr, 0, sizeof(addr));
     addr->sin_family = AF_INET;
     addr->sin_addr.s_addr = htonl(INADDR_ANY);
-    addr->sin_port = htons(PORT_NUM);
+    addr->sin_port = htons(DEFAULT_PORT_NUM);
 }
 
 int createSocket(int l, SAin* adrs)
@@ -81,18 +84,19 @@ void clientLoop(int sockfd)
         if(strcmp(buf, "help") == 0)    // check for 'help' command
         {
             printHelp();
-            continue; // TODO remove this and change to if/else
         }
         // check for quit command
-        if(strcmp(buf, "done") == 0 || strcmp(buf, "kill") == 0)
+        else if(strcmp(buf, "done") == 0 || strcmp(buf, "kill") == 0)
             done = 1;
-        
-        strcpy(sendBuf, buf);
-        // send data to server
-        sendMessage(sockfd, sendBuf, strlen(sendBuf));
-        memset(sendBuf, 0, strlen(sendBuf));
-        // get data from server
-        getResponse(sendBuf, buf, sockfd);    
+        else
+        {
+            strcpy(sendBuf, buf);
+            // send data to server
+            sendMessage(sockfd, sendBuf, strlen(sendBuf));
+            memset(sendBuf, 0, strlen(sendBuf));
+            // get data from server
+            getResponse(sendBuf, buf, sockfd);
+        }
     } while(!done);
 }
 
