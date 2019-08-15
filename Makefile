@@ -1,6 +1,6 @@
 PROGS=server client
 CC=gcc
-CFLAGS=-std=c99
+CFLAGS=-std=gnu99 -ggdb
 SRCSVR=server.c
 SRCCLT=client.c
 
