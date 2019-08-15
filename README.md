@@ -1,3 +1,7 @@
-# c-server-client-example
+# C Server Client
 A simple example for server-client programming using sockets in C.
-Use 'make all' to make both server and client programs. Alternitively, use 'make client' and 'make server' to create them individually.
+
+# Building
+Use `make all` to make both server and client programs.
+
+Alternatively, use `make client` or `make server` to build them individually.
