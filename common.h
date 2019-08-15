@@ -15,10 +15,9 @@
 #include <unistd.h>
 
 
-#define DEFAULT_PORT_NUM  71153
+#define DEFAULT_PORT_NUM  1153
 #define BUFFER_SIZE  32768
 
 typedef struct sockaddr_in SAin;
 
 #endif // CS_COMMON_H
-
