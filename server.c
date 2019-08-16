@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 
 #define MAX_CONNECTIONS 5
+static int clientId = 1;
 
 void error(char* msg)
 {
@@ -116,9 +117,11 @@ void createChild(char** arg, int s1, int s2)
             //dup2(s1, old);
             //sendMessage(old, s2, "END");
             //exit(0);
+            break;
         default:
             if(wait(NULL) == -1)
                 errorClose2Sock("wait error", s1, s2);
+            break;
     }
 }
 
@@ -127,7 +130,6 @@ void doLsl(char* file, int s1, int s2)
     char* arg[4];
     setupArg(arg, file);
     createChild(arg, s1, s2);
-    
 }
 
 void listContents(char* buf, int acpt, int lis)
@@ -150,12 +152,11 @@ void listContents(char* buf, int acpt, int lis)
 // TODO clean this up
 int handleConnection(char* buf, int acpt, int lis, int rcv)
 {
-    puts("client connected.");
+    printf("client %d connected.\n", clientId);
     while(strcmp(buf, "done") != 0)
     {
         // get message from client
         rcv = getMessage(acpt, lis, buf);
-        //printf("client sent: '%s'\n", buf);
     
         if(strcmp(buf, "kill") == 0)    // exit
         {
