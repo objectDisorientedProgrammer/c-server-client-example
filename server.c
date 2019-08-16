@@ -6,35 +6,30 @@
 */
 
 #include "server.h"
+#include "common.h"
 #include <sys/wait.h>
 
 #define MAX_CONNECTIONS 5
 static int clientId = 1;
 
-void error(char* msg)
-{
-    perror(msg);
-    exit(-1);
-}
-
 void errorCloseSock(char* msg, int sock)
 {
     close(sock);
-    error(msg);
+    CMN_error(msg);
 }
 
 void errorClose2Sock(char* msg, int sock, int sock2)
 {
     close(sock);
     close(sock2);
-    error(msg);
+    CMN_error(msg);
 }
 
 int createSocket(int l)
 {
     l = socket(AF_INET, SOCK_STREAM, 0);
     if(l < 0)
-        error("socket error");
+        CMN_error("socket error");
     return l;
 }
 

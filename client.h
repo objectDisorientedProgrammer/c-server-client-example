@@ -7,7 +7,13 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include "common.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef __cplusplus
+    }
+#endif
 
 #endif // CLIENT_H
 

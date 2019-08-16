@@ -6,20 +6,14 @@
 */
 
 #include "client.h"
+#include "common.h"
 
-#define ERROR_VAL  -1
 #define MIN_LENGTH 0
-
-void error(char* msg)
-{
-    perror(msg);
-    exit(ERROR_VAL);
-}
 
 void errorCloseSock(char* msg, int sock)
 {
     close(sock);
-    error(msg);
+    CMN_error(msg);
 }
 
 void printHelp()
@@ -52,7 +46,7 @@ int createSocket(int l, SAin* adrs)
 {
     l = socket(AF_INET, SOCK_STREAM, 0);
     if(l < MIN_LENGTH)
-        error("Socket create error.");
+        CMN_error("Socket create error.");
     setupSocket(adrs);    // init socket addr
     return l;
 }
