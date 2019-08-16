@@ -25,10 +25,10 @@ void errorCloseSock(char* msg, int sock)
 void printHelp()
 {
     puts("Commands:");
-    puts("  list <DIRECT OR FILE> [DIRECT OR FILE ...] - List dir or file.");
-    puts("  done - Quit client.");
-    puts("  kill - Quit server and client.");
-    puts("  help - Display command options.");
+    printf("  %s directory [directory ...] - List directory.\n", CMN_listCommand);
+    printf("  %s - Quit client.\n", CMN_clientQuitCommand);
+    printf("  %s - Quit server and client.\n", CMN_endSessionCommand);
+    printf("  %s - Display command options.\n", CMN_helpCommand);
 }
 
 int sendMessage(int fd, char* buf, int expLen)
@@ -77,26 +77,39 @@ void clientLoop(int sockfd)
 {
     char done = 0;
     char buf[BUFFER_SIZE], sendBuf[BUFFER_SIZE];
-    puts("\nEnter a command ('help' for options):");
+    printf("\nEnter a command ('%s' for options):\n", CMN_helpCommand);
     do
     {
         getUserInput(buf);
-        if(strcmp(buf, "help") == 0)    // check for 'help' command
+        if(strcmp(buf, CMN_helpCommand) == 0) // check for 'help' command
         {
             printHelp();
         }
         // check for quit command
-        else if(strcmp(buf, "done") == 0 || strcmp(buf, "kill") == 0)
-            done = 1;
-        else
+        else if(strcmp(buf, CMN_clientQuitCommand) == 0
+                || strcmp(buf, CMN_endSessionCommand) == 0)
         {
-            strcpy(sendBuf, buf);
+            done = 1;
+            strncpy(sendBuf, CMN_endSessionCommand, sizeof(CMN_endSessionCommand));
+            
+            // TODO fix this duplication below
             // send data to server
             sendMessage(sockfd, sendBuf, strlen(sendBuf));
             memset(sendBuf, 0, strlen(sendBuf));
             // get data from server
             getResponse(sendBuf, buf, sockfd);
         }
+        else
+        {
+            strcpy(sendBuf, buf);
+            // TODO fix this duplication above
+            // send data to server
+            sendMessage(sockfd, sendBuf, strlen(sendBuf));
+            memset(sendBuf, 0, strlen(sendBuf));
+            // get data from server
+            getResponse(sendBuf, buf, sockfd);
+        }
+        
     } while(!done);
 }
 

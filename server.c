@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 
 #define MAX_CONNECTIONS 5
+static int clientId = 1;
 
 void error(char* msg)
 {
@@ -96,29 +97,27 @@ void setupArg(char** arg, char* file)
 {
     arg[0] = "/bin/ls";
     arg[1] = "-l";
-    arg[2] = file == NULL? NULL : file; // TODO does this work?
+    arg[2] = (file == NULL)? NULL : file;
     arg[3] = NULL;
 }
 
 void createChild(char** arg, int s1, int s2)
 {
-    char* en[] = { "/bin", NULL};
     int old = s1;
     switch(fork())
     {
-        case -1: errorClose2Sock("fork failed", s1, s2); break;
+        case -1:
+            errorClose2Sock("fork failed", s1, s2);
+            break;
         case 0:
             dup2(s1, 1);
             if(execvp(arg[0], arg) == -1)
                 errorClose2Sock("exec error", s1, s2);
-            //fflush(1);
-            
-            //dup2(s1, old);
-            //sendMessage(old, s2, "END");
-            //exit(0);
+            break;
         default:
             if(wait(NULL) == -1)
                 errorClose2Sock("wait error", s1, s2);
+            break;
     }
 }
 
@@ -127,7 +126,6 @@ void doLsl(char* file, int s1, int s2)
     char* arg[4];
     setupArg(arg, file);
     createChild(arg, s1, s2);
-    
 }
 
 void listContents(char* buf, int acpt, int lis)
@@ -150,25 +148,28 @@ void listContents(char* buf, int acpt, int lis)
 // TODO clean this up
 int handleConnection(char* buf, int acpt, int lis, int rcv)
 {
-    puts("client connected.");
-    while(strcmp(buf, "done") != 0)
+    int done = 0;
+    printf("client %d connected.\n", clientId);
+
+    // get message from client
+    rcv = getMessage(acpt, lis, buf);
+
+    if(strcmp(buf, CMN_endSessionCommand) == 0)    // exit
     {
-        // get message from client
-        rcv = getMessage(acpt, lis, buf);
-        //printf("client sent: '%s'\n", buf);
-    
-        if(strcmp(buf, "kill") == 0)    // exit
-        {
-            return 1;
-        }
-        else if(strstr(buf, "list") != NULL) // list dir contents
-            listContents(buf, acpt, lis);
-        else if(strstr(buf, "done") != NULL) // client exit
-            puts("client disconnected");
-        else
-            sendMessage(acpt, lis, buf);    // echo message back
-        memset(buf, 0, strlen(buf));
+        done = 1;
     }
+    else if(strstr(buf, CMN_listCommand) != NULL) // list dir contents
+        listContents(buf, acpt, lis);
+    else if(strstr(buf, CMN_clientQuitCommand) != NULL) // client exit
+    {
+        puts("client disconnected");
+        done = 1;
+    }
+    else
+        sendMessage(acpt, lis, buf);    // echo message back
+    memset(buf, 0, strlen(buf));
+
+    return done;
 }
 
 void loopOverClients(int lis, int rcv)
@@ -176,9 +177,9 @@ void loopOverClients(int lis, int rcv)
     int done = 0;
     int acpt;
     char buf[BUFFER_SIZE];
-    
+
     while(!done)
-    {    
+    {
         rcv = listenForClient(lis);
         acpt = acceptConnection(lis);
         // loop once per connection

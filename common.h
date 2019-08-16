@@ -20,4 +20,9 @@
 
 typedef struct sockaddr_in SAin;
 
+const char* CMN_listCommand = "ls";
+const char* CMN_clientQuitCommand = "done";
+const char* CMN_endSessionCommand = "kill";
+const char* CMN_helpCommand = "help";
+
 #endif // CS_COMMON_H
